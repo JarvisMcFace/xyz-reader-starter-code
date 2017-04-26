@@ -1,4 +1,6 @@
 <resources>
+    <dimen name="material">16dp</dimen>
+
     <!-- list -->
     <dimen name="list_side_margin">4dp</dimen>
     <dimen name="list_toolbar_side_margin">0dp</dimen>
