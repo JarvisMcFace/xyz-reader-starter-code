@@ -54,17 +54,34 @@
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/material"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <FrameLayout
+
+            android:id="@+id/empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/empty_state"
+            android:paddingTop="@dimen/material">
+
+            <TextView
+                style="@style/Base.TextAppearance.AppCompat.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="No XYX Reader\narticles to show"
+                android:textColor="@android:color/white" />
+
+        </FrameLayout>
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="visible">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view"
@@ -76,6 +93,8 @@
                 android:paddingLeft="@dimen/list_side_margin"
                 android:paddingRight="@dimen/list_side_margin"
                 android:scrollbarStyle="outsideOverlay" />
+
+
         </android.support.v4.widget.SwipeRefreshLayout>
 
     </FrameLayout>

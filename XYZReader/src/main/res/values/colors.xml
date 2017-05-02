@@ -29,5 +29,6 @@
     <color name="divider">#BDBDBD</color>
 
 
+    <color name="empty_state">#BDBDBD</color>
     <color name="ltgray">#ffe0e0e0</color>
 </resources>

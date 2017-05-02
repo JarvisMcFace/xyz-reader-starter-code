@@ -52,15 +52,17 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
     // Most time functions can only handle 1902 - 2037
     private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2, 1, 1);
     private CoordinatorLayout coordinatorLayout;
+    private View emptyState;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
-        coordinatorLayout =  (CoordinatorLayout) findViewById(R.id.coordinatolayout);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatolayout);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        emptyState = findViewById(R.id.empty_state);
         getLoaderManager().initLoader(0, null, this);
 
         if (savedInstanceState == null) {
@@ -69,6 +71,7 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
     }
 
     private void refresh() {
+        emptyState.setVisibility(View.GONE);
         startService(new Intent(this, UpdaterService.class));
     }
 
@@ -106,25 +109,28 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
     }
 
 
-    private boolean hasNetworkConnectivity = true;
+    private boolean hasNoNetworkConnectivity;
 
     private BroadcastReceiver mRefreshingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (UpdaterService.BROADCAST_ACTION_STATE_CHANGE.equals(intent.getAction())) {
                 isRefreshing = intent.getBooleanExtra(UpdaterService.EXTRA_REFRESHING, false);
-                Log.d(TAG, "David: " + "onReceive()  isRefreshing called with: context = [" + context + "], intent = [" + intent + "]");
+                Log.d(TAG, "David: " + "onReceive() called with: mRefreshingReceiver ");
                 updateRefreshingUI();
             }
-
             if (UpdaterService.EXTRA_NO_NETWORK.equals(intent.getAction())) {
-                hasNetworkConnectivity = intent.getBooleanExtra(UpdaterService.EXTRA_NO_NETWORK, false);
-                showNoNetworkSnackBar();
-                Log.d(TAG, "David: " + "onReceive()  hasNetworkConnectivity called with: context = [" + context + "], intent = [" + intent + "]");
+                hasNoNetworkConnectivity = intent.getBooleanExtra(UpdaterService.EXTRA_NO_NETWORK, false);
+
+                if (hasNoNetworkConnectivity) {
+                    showNoNetworkSnackBar();
+                    emptyState.setVisibility(View.VISIBLE);
+                } else {
+                    emptyState.setVisibility(View.GONE);
+                }
             }
         }
     };
-
 
 
     private void updateRefreshingUI() {
@@ -213,6 +219,7 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
             subtitleView = (TextView) view.findViewById(R.id.article_subtitle);
         }
     }
+
     private void showNoNetworkSnackBar() {
         Snackbar snackbar = Snackbar
                 .make(coordinatorLayout, getString(R.string.no_network_connection), Snackbar.LENGTH_INDEFINITE)
