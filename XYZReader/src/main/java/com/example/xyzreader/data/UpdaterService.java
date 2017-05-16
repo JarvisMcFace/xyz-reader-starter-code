@@ -38,7 +38,6 @@ public class UpdaterService extends IntentService {
         NetworkInfo ni = cm.getActiveNetworkInfo();
         if (ni == null || !ni.isConnected()) {
             Log.w(TAG, "Not online, not refreshing.");
-            Log.d(TAG, "David: " + "Not online, not refreshing.");
             sendStickyBroadcast(new Intent(EXTRA_NO_NETWORK).putExtra(EXTRA_NO_NETWORK, true));
             return;
         }

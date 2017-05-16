@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,7 @@ import com.example.xyzreader.data.ArticleLoader;
 import com.example.xyzreader.data.ItemsContract;
 import com.example.xyzreader.data.UpdaterService;
 
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,7 +40,7 @@ import java.util.GregorianCalendar;
  * touched, lead to a {@link ArticleDetailActivity} representing item details. On tablets, the
  * activity presents a grid of items as cards.
  */
-public class ArticleListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ArticleListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, SelectedArticleCallback{
 
     private static final String TAG = ArticleListActivity.class.toString();
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -90,12 +92,14 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return ArticleLoader.newAllArticlesInstance(this);
+        return ArticleLoader.newLoadAllArticlesInstance(this);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        Adapter adapter = new Adapter(cursor);
+
+        WeakReference<SelectedArticleCallback> callBackWeakReference = new WeakReference<SelectedArticleCallback>(this);
+        Adapter adapter = new Adapter(callBackWeakReference, cursor);
         adapter.setHasStableIds(true);
         recyclerView.setAdapter(adapter);
         int columnCount = getResources().getInteger(R.integer.list_column_count);
@@ -137,11 +141,21 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
         swipeRefreshLayout.setRefreshing(isRefreshing);
     }
 
-    private class Adapter extends RecyclerView.Adapter<ViewHolder> {
-        private Cursor cursor;
+    @Override
+    public void onSelectedArticle(Uri uri) {
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    }
 
-        public Adapter(Cursor cursor) {
+
+
+    private class Adapter extends RecyclerView.Adapter<ViewHolder> {
+
+        private Cursor cursor;
+        private WeakReference<SelectedArticleCallback> callBackWeakReference;
+
+        public Adapter(WeakReference<SelectedArticleCallback> callBackWeakReference, Cursor cursor) {
             this.cursor = cursor;
+            this.callBackWeakReference = callBackWeakReference;
         }
 
         @Override
@@ -157,8 +171,12 @@ public class ArticleListActivity extends AppCompatActivity implements LoaderMana
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()))));
+
+                    SelectedArticleCallback callback = callBackWeakReference.get();
+                    Uri uri = ItemsContract.Items.buildItemUri(getItemId(vh.getAdapterPosition()));
+                    callback.onSelectedArticle(uri);
+
+//                    startActivity(new Intent(Intent.ACTION_VIEW,uri));
                 }
             });
             return vh;

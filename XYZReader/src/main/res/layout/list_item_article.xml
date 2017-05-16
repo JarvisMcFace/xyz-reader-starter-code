@@ -19,6 +19,7 @@
         android:orientation="vertical">
 
         <com.example.xyzreader.ui.DynamicHeightNetworkImageView
+            android:transitionName="@string/article_photo_transition"
             android:id="@+id/thumbnail"
             android:layout_width="match_parent"
             android:layout_height="0dp"
